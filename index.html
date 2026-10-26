@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudShare | File Sharing Portal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fc;color:#172033}
+header{background:#173b72;color:white;padding:24px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+header h1{margin:0;font-size:27px}
+header p{margin:7px 0 0;color:#dbeafe}
+.badge{background:#dbeafe;color:#173b72;padding:9px 14px;border-radius:20px;font-weight:bold}
+main{max-width:1000px;margin:35px auto;padding:0 18px}
+.welcome{margin-bottom:25px}
+.welcome h2{margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:22px}
+.card{background:white;padding:24px;border-radius:14px;box-shadow:0 5px 22px #17203312}
+.card h3{margin-top:0}
+input[type=text],input[type=file]{width:100%;padding:12px;margin:9px 0 16px;border:1px solid #ccd5e3;border-radius:8px}
+button{border:0;border-radius:8px;background:#2459a9;color:white;padding:12px 17px;font-weight:bold;cursor:pointer}
+button:hover{background:#173b72}
+button:disabled{opacity:.6;cursor:wait}
+.secondary{background:#e6eefb;color:#173b72}
+#status{margin-top:18px;padding:13px;border-radius:8px;overflow-wrap:anywhere}
+.hidden{display:none}
+.file{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #e6eaf0;overflow-wrap:anywhere}
+.file-name{font-weight:bold;max-width:70%;overflow-wrap:anywhere}
+.muted{color:#64748b;font-size:14px}
+footer{text-align:center;color:#64748b;padding:28px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>☁ CloudShare</h1>
+    <p>Simple file sharing for PC1, PC2, PC3 and PC4</p>
+  </div>
+  <span class="badge">Online File Portal</span>
+</header>
+
+<main>
+  <section class="welcome">
+    <h2>Welcome to CloudShare</h2>
+    <p>Upload a document and share it with other users through this portal.</p>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h3>📤 Upload a File</h3>
+      <p class="muted">Choose a file and give it a name others can recognize.</p>
+      <form id="uploadForm">
+        <label for="filename">File name</label>
+        <input id="filename" type="text" maxlength="120"
+          placeholder="e.g. assignment.pdf" required>
+        <label for="file">Select document</label>
+        <input id="file" type="file" required>
+        <button id="uploadBtn" type="submit">Upload File</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>📁 Shared Files</h3>
+      <p class="muted">Files uploaded by users appear here.</p>
+      <button id="refreshBtn" class="secondary" type="button">
+        Refresh File List
+      </button>
+      <div id="fileList" aria-live="polite">Loading files...</div>
+    </section>
+  </div>
+
+  <div id="status" class="hidden" role="status"></div>
+</main>
+
+<footer>CloudShare Portal · GitHub Storage · Cloudflare API</footer>
+
+<script>
+const API = "https://cloudshare-api.atiqworkhub.workers.dev";
+const form = document.getElementById("uploadForm");
+const statusBox = document.getElementById("status");
+const uploadBtn = document.getElementById("uploadBtn");
+const fileList = document.getElementById("fileList");
+
+function showStatus(message, error = false) {
+  statusBox.textContent = message;
+  statusBox.classList.remove("hidden");
+  statusBox.style.background = error ? "#fee2e2" : "#dcfce7";
+  statusBox.style.color = error ? "#991b1b" : "#166534";
+}
+
+async function loadFiles() {
+  fileList.textContent = "Loading files...";
+  try {
+    const response = await fetch(`${API}/api/files`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Could not load files.");
+
+    fileList.replaceChildren();
+
+    if (!data.files || data.files.length === 0) {
+      fileList.textContent = "No files uploaded yet.";
+      return;
+    }
+
+    data.files.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "file";
+
+      const details = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "file-name";
+      name.textContent = item.name;
+
+      const size = document.createElement("div");
+      size.className = "muted";
+      size.textContent = `${Math.ceil((item.size || 0) / 1024)} KB`;
+
+      details.append(name, size);
+
+      const link = document.createElement("a");
+      link.href = item.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Download";
+      link.style.color = "#2459a9";
+      link.style.fontWeight = "bold";
+
+      row.append(details, link);
+      fileList.appendChild(row);
+    });
+  } catch (error) {
+    fileList.textContent = "Could not load files. Check your internet connection and API.";
+    showStatus(error.message, true);
+  }
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const file = document.getElementById("file").files[0];
+  const name = document.getElementById("filename").value.trim();
+
+  if (!file || !name) {
+    showStatus("Please enter a file name and select a file.", true);
+    return;
+  }
+
+  // Base64 increases file size by approximately one third.
+  if (file.size > 1400000) {
+    showStatus("Please select a file smaller than approximately 1.4 MB.", true);
+    return;
+  }
+
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = "Uploading...";
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",")[1]);
+      reader.onerror = () => reject(new Error("Could not read this file."));
+      reader.readAsDataURL(file);
+    });
+
+    const response = await fetch(`${API}/api/upload`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name, content: base64})
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Upload failed.");
+    }
+
+    showStatus(`Success! "${name}" was uploaded.`);
+    form.reset();
+    await loadFiles();
+  } catch (error) {
+    showStatus(`Upload failed: ${error.message}`, true);
+  } finally {
+    uploadBtn.disabled = false;
+    uploadBtn.textContent = "Upload File";
+  }
+});
+
+document.getElementById("refreshBtn").addEventListener("click", loadFiles);
+loadFiles();
+</script>
+</body>
+</html>
