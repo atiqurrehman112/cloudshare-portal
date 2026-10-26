@@ -3,81 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CloudShare | File Sharing Portal</title>
+<title>CloudShare | Secure File Portal</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f3f6fc;color:#172033}
-header{background:#173b72;color:white;padding:24px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-header h1{margin:0;font-size:27px}
-header p{margin:7px 0 0;color:#dbeafe}
-.badge{background:#dbeafe;color:#173b72;padding:9px 14px;border-radius:20px;font-weight:bold}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5fb;color:#172033}
+header{background:#173b72;color:white;padding:24px 6%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:28px}
+header p{margin:8px 0 0;color:#dbeafe}
 main{max-width:1000px;margin:35px auto;padding:0 18px}
-.welcome{margin-bottom:25px}
-.welcome h2{margin-bottom:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:22px}
-.card{background:white;padding:24px;border-radius:14px;box-shadow:0 5px 22px #17203312}
-.card h3{margin-top:0}
-input[type=text],input[type=file]{width:100%;padding:12px;margin:9px 0 16px;border:1px solid #ccd5e3;border-radius:8px}
-button{border:0;border-radius:8px;background:#2459a9;color:white;padding:12px 17px;font-weight:bold;cursor:pointer}
+.card{background:white;padding:25px;border-radius:14px;box-shadow:0 5px 22px #17203312;margin-bottom:22px}
+.login-card{max-width:440px;margin:45px auto}
+h2,h3{margin-top:0}
+label{display:block;font-weight:bold;margin-top:14px}
+input,select{width:100%;padding:12px;margin-top:7px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px}
+button{border:0;border-radius:8px;padding:12px 17px;background:#2459a9;color:white;font-weight:bold;cursor:pointer}
 button:hover{background:#173b72}
 button:disabled{opacity:.6;cursor:wait}
-.secondary{background:#e6eefb;color:#173b72}
-#status{margin-top:18px;padding:13px;border-radius:8px;overflow-wrap:anywhere}
-.hidden{display:none}
-.file{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #e6eaf0;overflow-wrap:anywhere}
-.file-name{font-weight:bold;max-width:70%;overflow-wrap:anywhere}
+.secondary{background:#e5edf9;color:#173b72}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:22px}
+.file{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #e2e8f0}
+.file-name{font-weight:bold;overflow-wrap:anywhere}
 .muted{color:#64748b;font-size:14px}
-footer{text-align:center;color:#64748b;padding:28px}
+#status{padding:13px;border-radius:8px;margin:15px 0;overflow-wrap:anywhere}
+.hidden{display:none!important}
+footer{text-align:center;color:#64748b;padding:25px}
+.top-user{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{background:#dbeafe;color:#173b72;padding:8px 12px;border-radius:18px;font-weight:bold}
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>☁ CloudShare</h1>
-    <p>Simple file sharing for PC1, PC2, PC3 and PC4</p>
+    <p>PC1 · PC2 · PC3 · PC4 File Sharing Portal</p>
   </div>
-  <span class="badge">Online File Portal</span>
+  <div class="top-user">
+    <span id="userBadge" class="badge hidden"></span>
+    <button id="logoutBtn" class="secondary hidden">Log Out</button>
+  </div>
 </header>
 
 <main>
-  <section class="welcome">
-    <h2>Welcome to CloudShare</h2>
-    <p>Upload a document and share it with other users through this portal.</p>
+  <div id="status" class="hidden" role="status"></div>
+
+  <section id="loginSection" class="card login-card">
+    <h2>Welcome Back</h2>
+    <p class="muted">Log in with your assigned PC account to access shared files.</p>
+    <form id="loginForm">
+      <label for="username">Select Account</label>
+      <select id="username" required>
+        <option value="PC1">PC1</option>
+        <option value="PC2">PC2</option>
+        <option value="PC3">PC3</option>
+        <option value="PC4">PC4</option>
+      </select>
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password"
+             placeholder="Enter your password" required>
+
+      <button id="loginBtn" type="submit" style="width:100%;margin-top:20px">
+        Log In
+      </button>
+    </form>
   </section>
 
-  <div class="grid">
-    <section class="card">
-      <h3>📤 Upload a File</h3>
-      <p class="muted">Choose a file and give it a name others can recognize.</p>
-      <form id="uploadForm">
-        <label for="filename">File name</label>
-        <input id="filename" type="text" maxlength="120"
-          placeholder="e.g. assignment.pdf" required>
-        <label for="file">Select document</label>
-        <input id="file" type="file" required>
-        <button id="uploadBtn" type="submit">Upload File</button>
-      </form>
-    </section>
+  <section id="portalSection" class="hidden">
+    <div class="card">
+      <h2>Shared File Portal</h2>
+      <p class="muted">You are logged in. Upload a file or download a shared document.</p>
+    </div>
 
-    <section class="card">
-      <h3>📁 Shared Files</h3>
-      <p class="muted">Files uploaded by users appear here.</p>
-      <button id="refreshBtn" class="secondary" type="button">
-        Refresh File List
-      </button>
-      <div id="fileList" aria-live="polite">Loading files...</div>
-    </section>
-  </div>
+    <div class="grid">
+      <section class="card">
+        <h3>📤 Upload a File</h3>
+        <form id="uploadForm">
+          <label for="filename">File name</label>
+          <input id="filename" type="text" maxlength="120"
+                 placeholder="e.g. assignment.pdf" required>
 
-  <div id="status" class="hidden" role="status"></div>
+          <label for="file">Select document</label>
+          <input id="file" type="file" required>
+
+          <button id="uploadBtn" type="submit" style="margin-top:12px">
+            Upload File
+          </button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h3>📁 Shared Files</h3>
+        <p class="muted">Files uploaded by all four accounts appear here.</p>
+        <button id="refreshBtn" class="secondary" type="button">
+          Refresh File List
+        </button>
+        <div id="fileList" style="margin-top:15px">Loading files...</div>
+      </section>
+    </div>
+  </section>
 </main>
 
-<footer>CloudShare Portal · GitHub Storage · Cloudflare API</footer>
+<footer>CloudShare · GitHub Storage · Cloudflare Workers</footer>
 
 <script>
 const API = "https://cloudshare-api.atiqworkhub.workers.dev";
-const form = document.getElementById("uploadForm");
+const SESSION_KEY = "cloudshare_session";
+const USER_KEY = "cloudshare_user";
+
+let token = sessionStorage.getItem(SESSION_KEY) || "";
+let currentUser = sessionStorage.getItem(USER_KEY) || "";
+
+const loginSection = document.getElementById("loginSection");
+const portalSection = document.getElementById("portalSection");
 const statusBox = document.getElementById("status");
+const userBadge = document.getElementById("userBadge");
+const logoutBtn = document.getElementById("logoutBtn");
+const loginBtn = document.getElementById("loginBtn");
 const uploadBtn = document.getElementById("uploadBtn");
 const fileList = document.getElementById("fileList");
 
@@ -88,12 +130,103 @@ function showStatus(message, error = false) {
   statusBox.style.color = error ? "#991b1b" : "#166534";
 }
 
+function clearStatus() {
+  statusBox.classList.add("hidden");
+}
+
+function showLogin() {
+  token = "";
+  currentUser = "";
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(USER_KEY);
+  loginSection.classList.remove("hidden");
+  portalSection.classList.add("hidden");
+  userBadge.classList.add("hidden");
+  logoutBtn.classList.add("hidden");
+}
+
+function showPortal() {
+  loginSection.classList.add("hidden");
+  portalSection.classList.remove("hidden");
+  userBadge.textContent = currentUser;
+  userBadge.classList.remove("hidden");
+  logoutBtn.classList.remove("hidden");
+}
+
+async function apiFetch(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${token}`);
+
+  const response = await fetch(`${API}${path}`, {
+    ...options,
+    headers
+  });
+
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("The server returned an unexpected response.");
+  }
+
+  if (response.status === 401) {
+    showLogin();
+    throw new Error("Your session expired. Please log in again.");
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || `Request failed (${response.status}).`);
+  }
+
+  return data;
+}
+
+document.getElementById("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearStatus();
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Logging in...";
+
+  try {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const response = await fetch(`${API}/api/login`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({username, password})
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Login failed.");
+    }
+
+    token = data.token;
+    currentUser = data.username;
+
+    sessionStorage.setItem(SESSION_KEY, token);
+    sessionStorage.setItem(USER_KEY, currentUser);
+
+    document.getElementById("password").value = "";
+    showPortal();
+    showStatus(`Welcome, ${currentUser}!`);
+    await loadFiles();
+  } catch (error) {
+    showStatus(error.message, true);
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Log In";
+  }
+});
+
 async function loadFiles() {
   fileList.textContent = "Loading files...";
+
   try {
-    const response = await fetch(`${API}/api/files`);
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Could not load files.");
+    const data = await apiFetch("/api/files");
 
     fileList.replaceChildren();
 
@@ -126,26 +259,31 @@ async function loadFiles() {
       link.style.fontWeight = "bold";
 
       row.append(details, link);
-      fileList.appendChild(row);
+      fileList.append(row);
     });
   } catch (error) {
-    fileList.textContent = "Could not load files. Check your internet connection and API.";
+    fileList.textContent = "Could not load files.";
     showStatus(error.message, true);
   }
 }
 
-form.addEventListener("submit", async event => {
+document.getElementById("uploadForm").addEventListener("submit", async event => {
   event.preventDefault();
+  clearStatus();
 
   const file = document.getElementById("file").files[0];
   const name = document.getElementById("filename").value.trim();
 
   if (!file || !name) {
-    showStatus("Please enter a file name and select a file.", true);
+    showStatus("Enter a file name and select a file.", true);
     return;
   }
 
-  // Base64 increases file size by approximately one third.
+  if (file.size === 0) {
+    showStatus("The selected file is empty.", true);
+    return;
+  }
+
   if (file.size > 1400000) {
     showStatus("Please select a file smaller than approximately 1.4 MB.", true);
     return;
@@ -155,29 +293,24 @@ form.addEventListener("submit", async event => {
   uploadBtn.textContent = "Uploading...";
 
   try {
-    const base64 = await new Promise((resolve, reject) => {
+    const content = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result).split(",")[1]);
-      reader.onerror = () => reject(new Error("Could not read this file."));
+      reader.onerror = () => reject(new Error("Could not read the selected file."));
       reader.readAsDataURL(file);
     });
 
-    const response = await fetch(`${API}/api/upload`, {
+    const data = await apiFetch("/api/upload", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({name, content: base64})
+      body: JSON.stringify({name, content})
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Upload failed.");
-    }
-
-    showStatus(`Success! "${name}" was uploaded.`);
-    form.reset();
+    showStatus(`Success! ${data.name} was uploaded.`);
+    event.target.reset();
     await loadFiles();
   } catch (error) {
-    showStatus(`Upload failed: ${error.message}`, true);
+    showStatus(error.message, true);
   } finally {
     uploadBtn.disabled = false;
     uploadBtn.textContent = "Upload File";
@@ -185,7 +318,20 @@ form.addEventListener("submit", async event => {
 });
 
 document.getElementById("refreshBtn").addEventListener("click", loadFiles);
-loadFiles();
+
+logoutBtn.addEventListener("click", () => {
+  showLogin();
+  fileList.replaceChildren();
+  clearStatus();
+  showStatus("You have logged out.");
+});
+
+if (token && currentUser) {
+  showPortal();
+  loadFiles();
+} else {
+  showLogin();
+}
 </script>
 </body>
 </html>
